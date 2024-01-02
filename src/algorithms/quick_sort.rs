@@ -1,49 +1,25 @@
+mod partition;
+
+use self::partition::partition as exec_partition;
 use crate::{Order, Partition};
 
-fn partition<T: PartialOrd>(
+pub fn sort<T: PartialOrd>(data: &mut [T], order: Order, partition: Partition) {
+    sort_rec(data, 0, data.len() - 1, &order, &partition)
+}
+
+fn sort_rec<T: PartialOrd>(
     data: &mut [T],
     l: usize,
     r: usize,
-    order: Order,
-    partition: Partition,
-) -> usize {
-    let pivot = match partition {
-        Partition::First => l,
-        Partition::Last => r,
-        Partition::Center => usize::from((l + r) / 2),
-    };
-    let mut i = l;
-
-    for j in l..=r {
-        if i == pivot {
-            i += 1;
-        }
-        if j == pivot {
-            continue;
-        }
-
-        match order {
-            Order::Asc => {
-                if data[j] < data[pivot] {
-                    data.swap(i, j);
-                    i += 1;
-                }
-            }
-            Order::Desc => {
-                if data[j] > data[pivot] {
-                    data.swap(i, j);
-                    i += 1;
-                }
-            }
-        }
+    order: &Order,
+    partition: &Partition,
+) {
+    let pivot = exec_partition(data, l, r, order, partition);
+    if pivot > l + 1 {
+        sort_rec(data, l, pivot - 1, order, partition);
     }
-
-    if i <= pivot {
-        data.swap(i, pivot);
-        return i;
-    } else {
-        data.swap(i - 1, pivot);
-        return i - 1;
+    if pivot + 1 < r {
+        sort_rec(data, pivot + 1, r, order, partition);
     }
 }
 
@@ -52,177 +28,32 @@ mod tests {
     use super::*;
 
     #[test]
-    fn partition_first() {
-        let mut arr = [4, 1, 3, 2, 5];
-        let pivot = partition(&mut arr, 0, 4, Order::Asc, Partition::First);
+    fn sort_array_asc() {
+        let mut arr = [2, 3, 1, 5, 4];
+        sort(&mut arr, Order::Asc, Partition::First);
+        assert_eq!([1, 2, 3, 4, 5], arr);
 
-        assert!(arr[0] <= 4);
-        assert!(arr[1] <= 4);
-        assert!(arr[2] <= 4);
-        assert_eq!(arr[3], 4);
-        assert_eq!(arr[4], 5);
-        assert_eq!(pivot, 3);
+        let mut arr = [2, 3, 1, 5, 4];
+        sort(&mut arr, Order::Asc, Partition::Last);
+        assert_eq!([1, 2, 3, 4, 5], arr);
 
-        let mut arr = [4, 1, 3, 2, 5];
-        let pivot = partition(&mut arr, 0, 4, Order::Desc, Partition::First);
-
-        assert_eq!(arr[0], 5);
-        assert_eq!(arr[1], 4);
-        assert!(arr[2] <= 4);
-        assert!(arr[3] <= 4);
-        assert!(arr[4] <= 4);
-        assert_eq!(pivot, 1);
+        let mut arr = [2, 3, 1, 5, 4];
+        sort(&mut arr, Order::Asc, Partition::Center);
+        assert_eq!([1, 2, 3, 4, 5], arr);
     }
 
     #[test]
-    fn partition_last() {
-        let mut arr = [5, 1, 3, 2, 4];
-        let pivot = partition(&mut arr, 0, 4, Order::Asc, Partition::Last);
+    fn sort_array_desc() {
+        let mut arr = [2, 3, 1, 5, 4];
+        sort(&mut arr, Order::Desc, Partition::First);
+        assert_eq!([5, 4, 3, 2, 1], arr);
 
-        assert!(arr[0] <= 4);
-        assert!(arr[1] <= 4);
-        assert!(arr[2] <= 4);
-        assert_eq!(arr[3], 4);
-        assert_eq!(arr[4], 5);
-        assert_eq!(pivot, 3);
+        let mut arr = [2, 3, 1, 5, 4];
+        sort(&mut arr, Order::Desc, Partition::Last);
+        assert_eq!([5, 4, 3, 2, 1], arr);
 
-        let mut arr = [5, 1, 3, 2, 4];
-        let pivot = partition(&mut arr, 0, 4, Order::Desc, Partition::Last);
-
-        assert_eq!(arr[0], 5);
-        assert_eq!(arr[1], 4);
-        assert!(arr[2] <= 4);
-        assert!(arr[3] <= 4);
-        assert!(arr[4] <= 4);
-        assert_eq!(pivot, 1);
-    }
-
-    #[test]
-    fn partition_center() {
-        let mut arr = [5, 1, 4, 2, 3];
-        let pivot = partition(&mut arr, 0, 4, Order::Asc, Partition::Center);
-
-        assert!(arr[0] <= 4);
-        assert!(arr[1] <= 4);
-        assert!(arr[2] <= 4);
-        assert_eq!(arr[3], 4);
-        assert_eq!(arr[4], 5);
-        assert_eq!(pivot, 3);
-
-        let mut arr = [5, 1, 4, 2, 3];
-        let pivot = partition(&mut arr, 0, 4, Order::Desc, Partition::Center);
-
-        assert_eq!(arr[0], 5);
-        assert_eq!(arr[1], 4);
-        assert!(arr[2] <= 4);
-        assert!(arr[3] <= 4);
-        assert!(arr[4] <= 4);
-        assert_eq!(pivot, 1);
-    }
-
-    #[test]
-    fn partition_inside() {
-        let mut arr = [6, 5, 1, 4, 2, 3, 0];
-        partition(&mut arr, 1, 5, Order::Asc, Partition::First);
-
-        assert_eq!(arr[0], 6);
-        assert_eq!(arr[5], 5);
-        assert_eq!(arr[6], 0);
-    }
-
-    #[test]
-    fn partition_duplicate() {
-        let mut arr = [4, 1, 4, 2, 5];
-        let pivot = partition(&mut arr, 0, 4, Order::Asc, Partition::First);
-
-        assert!(arr[0] <= 4);
-        assert!(arr[1] <= 4);
-        assert_eq!(arr[2], 4);
-        assert!(arr[3] >= 4);
-        assert!(arr[4] >= 4);
-        assert_eq!(pivot, 2);
-
-        let mut arr = [5, 4, 3, 2, 4];
-        let pivot = partition(&mut arr, 0, 4, Order::Asc, Partition::Last);
-
-        assert!(arr[0] <= 4);
-        assert!(arr[1] <= 4);
-        assert_eq!(arr[2], 4);
-        assert!(arr[3] >= 4);
-        assert!(arr[4] >= 4);
-        assert_eq!(pivot, 2);
-
-        let mut arr = [5, 4, 4, 2, 3];
-        let pivot = partition(&mut arr, 0, 4, Order::Asc, Partition::Center);
-
-        assert_eq!(pivot, 2);
-        assert!(arr[0] <= 4);
-        assert!(arr[1] <= 4);
-        assert_eq!(arr[2], 4);
-        assert!(arr[3] >= 4);
-        assert!(arr[4] >= 4);
-    }
-
-    #[test]
-    fn partition_smallest() {
-        let mut arr = [1, 4, 3, 2, 5];
-        let pivot = partition(&mut arr, 0, 4, Order::Asc, Partition::First);
-
-        assert_eq!(arr[0], 1);
-        assert!(arr[1] >= 1);
-        assert!(arr[2] >= 1);
-        assert!(arr[3] >= 1);
-        assert!(arr[4] >= 1);
-        assert_eq!(pivot, 0);
-
-        let mut arr = [1, 4, 3, 2, 5];
-        let pivot = partition(&mut arr, 0, 4, Order::Desc, Partition::First);
-
-        assert!(arr[0] >= 1);
-        assert!(arr[1] >= 1);
-        assert!(arr[2] >= 1);
-        assert!(arr[3] >= 1);
-        assert_eq!(arr[4], 1);
-        assert_eq!(pivot, 4);
-
-        let mut arr = [5, 3, 4, 2, 1];
-        let pivot = partition(&mut arr, 0, 4, Order::Asc, Partition::Last);
-
-        assert_eq!(arr[0], 1);
-        assert!(arr[1] >= 1);
-        assert!(arr[2] >= 1);
-        assert!(arr[3] >= 1);
-        assert!(arr[4] >= 1);
-        assert_eq!(pivot, 0);
-
-        let mut arr = [5, 3, 4, 2, 1];
-        let pivot = partition(&mut arr, 0, 4, Order::Desc, Partition::Last);
-
-        assert!(arr[0] >= 1);
-        assert!(arr[1] >= 1);
-        assert!(arr[2] >= 1);
-        assert!(arr[3] >= 1);
-        assert_eq!(arr[4], 1);
-        assert_eq!(pivot, 4);
-
-        let mut arr = [5, 3, 1, 2, 4];
-        let pivot = partition(&mut arr, 0, 4, Order::Asc, Partition::Center);
-
-        assert_eq!(arr[0], 1);
-        assert!(arr[1] >= 1);
-        assert!(arr[2] >= 1);
-        assert!(arr[3] >= 1);
-        assert!(arr[4] >= 1);
-        assert_eq!(pivot, 0);
-
-        let mut arr = [5, 3, 1, 2, 4];
-        let pivot = partition(&mut arr, 0, 4, Order::Desc, Partition::Center);
-
-        assert!(arr[0] >= 1);
-        assert!(arr[1] >= 1);
-        assert!(arr[2] >= 1);
-        assert!(arr[3] >= 1);
-        assert_eq!(arr[4], 1);
-        assert_eq!(pivot, 4);
+        let mut arr = [2, 3, 1, 5, 4];
+        sort(&mut arr, Order::Desc, Partition::Center);
+        assert_eq!([5, 4, 3, 2, 1], arr);
     }
 }
