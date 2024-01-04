@@ -1,6 +1,12 @@
 #[derive(Clone, Copy, Debug)]
 pub struct Person {
-    pub age: u8,
+    age: u8,
+}
+
+impl Person {
+    pub fn new(age: u8) -> Person {
+        Person { age }
+    }
 }
 
 impl PartialOrd for Person {
@@ -10,6 +16,17 @@ impl PartialOrd for Person {
 }
 
 impl PartialEq for Person {
+    fn eq(&self, other: &Self) -> bool {
+        self.age == other.age
+    }
+}
+
+#[derive(Clone, Copy, Debug)]
+pub struct Car {
+    pub age: u8,
+}
+
+impl PartialEq for Car {
     fn eq(&self, other: &Self) -> bool {
         self.age == other.age
     }
