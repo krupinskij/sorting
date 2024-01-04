@@ -1,6 +1,4 @@
-mod partition;
-
-use self::partition::{partition as partition_by_order, partition_by_predicate};
+use super::partition::{partition as partition_by_order, partition_by_predicate};
 use crate::{Order, Partition};
 
 pub fn sort<T: PartialOrd>(data: &mut [T], order: Order, partition: Partition) {
@@ -50,7 +48,8 @@ fn sort_by_predicate_rec<T: PartialOrd, P>(
 
 #[cfg(test)]
 mod tests {
-    use super::{super::helpers::Person, *};
+    use super::*;
+    use crate::helpers::Person;
 
     #[test]
     fn sort_array_asc() {

@@ -42,7 +42,8 @@ where
 
 #[cfg(test)]
 mod tests {
-    use super::{super::helpers::Person, *};
+    use super::*;
+    use crate::helpers::Person;
 
     #[test]
     fn sort_array_asc() {
