@@ -43,7 +43,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::helpers::Person;
+    use crate::helpers::{Car, Person};
 
     #[test]
     fn sort_array_asc() {
@@ -68,9 +68,9 @@ mod tests {
 
     #[test]
     fn sort_struct_vector() {
-        let person1 = Person { age: 25 };
-        let person2 = Person { age: 15 };
-        let person3 = Person { age: 35 };
+        let person1 = Person::new(25);
+        let person2 = Person::new(15);
+        let person3 = Person::new(35);
 
         let mut vec = vec![person1, person2, person3];
         sort(&mut vec, Order::Asc);
@@ -100,12 +100,12 @@ mod tests {
 
     #[test]
     fn sort_by_predicate_struct_vector() {
-        let person1 = Person { age: 25 };
-        let person2 = Person { age: 15 };
-        let person3 = Person { age: 35 };
+        let car1 = Car { age: 25 };
+        let car2 = Car { age: 15 };
+        let car3: Car = Car { age: 35 };
 
-        let mut vec = vec![person1, person2, person3];
-        sort_by_predicate(&mut vec, |person1, person2| person1.age < person2.age);
-        assert_eq!(vec![person2, person1, person3], vec);
+        let mut vec = vec![car1, car2, car3];
+        sort_by_predicate(&mut vec, |c1, c2| c1.age < c2.age);
+        assert_eq!(vec![car2, car1, car3], vec);
     }
 }

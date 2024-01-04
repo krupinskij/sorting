@@ -47,7 +47,7 @@ pub fn partition<T: PartialOrd>(
     }
 }
 
-pub fn partition_by_predicate<T: PartialOrd, P>(
+pub fn partition_by_predicate<T, P>(
     data: &mut [T],
     l: usize,
     r: usize,

@@ -21,14 +21,14 @@ fn sort_rec<T: PartialOrd>(
     }
 }
 
-pub fn sort_by_predicate<T: PartialOrd, P>(data: &mut [T], predicate: P, partition: Partition)
+pub fn sort_by_predicate<T, P>(data: &mut [T], predicate: P, partition: Partition)
 where
     P: Fn(&T, &T) -> bool,
 {
     sort_by_predicate_rec(data, 0, data.len() - 1, &predicate, &partition)
 }
 
-fn sort_by_predicate_rec<T: PartialOrd, P>(
+fn sort_by_predicate_rec<T, P>(
     data: &mut [T],
     l: usize,
     r: usize,
@@ -49,7 +49,7 @@ fn sort_by_predicate_rec<T: PartialOrd, P>(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::helpers::Person;
+    use crate::helpers::{Car, Person};
 
     #[test]
     fn sort_array_asc() {
@@ -92,9 +92,9 @@ mod tests {
 
     #[test]
     fn sort_struct_vector() {
-        let person1 = Person { age: 25 };
-        let person2 = Person { age: 15 };
-        let person3 = Person { age: 35 };
+        let person1 = Person::new(25);
+        let person2 = Person::new(15);
+        let person3 = Person::new(35);
 
         let mut vec = vec![person1, person2, person3];
         sort(&mut vec, Order::Asc, Partition::First);
@@ -115,12 +115,12 @@ mod tests {
 
     #[test]
     fn sort_struct_vector_by_predicate() {
-        let person1 = Person { age: 25 };
-        let person2 = Person { age: 15 };
-        let person3 = Person { age: 35 };
+        let car1 = Car { age: 25 };
+        let car2 = Car { age: 15 };
+        let car3 = Car { age: 35 };
 
-        let mut vec = vec![person1, person2, person3];
-        sort_by_predicate(&mut vec, |p1, p2| p1.age < p2.age, Partition::First);
-        assert_eq!(vec![person2, person1, person3], vec);
+        let mut vec = vec![car1, car2, car3];
+        sort_by_predicate(&mut vec, |c1, c2| c1.age < c2.age, Partition::First);
+        assert_eq!(vec![car2, car1, car3], vec);
     }
 }
