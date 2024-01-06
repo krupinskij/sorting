@@ -1,24 +1,12 @@
-use super::partition::{partition as partition_by_order, partition_by_predicate};
+use super::partition::partition_by_predicate;
 use crate::{Order, Partition};
 
 pub fn sort<T: PartialOrd>(data: &mut [T], order: Order, partition: Partition) {
-    sort_rec(data, 0, data.len() - 1, &order, &partition)
-}
-
-fn sort_rec<T: PartialOrd>(
-    data: &mut [T],
-    l: usize,
-    r: usize,
-    order: &Order,
-    partition: &Partition,
-) {
-    let pivot = partition_by_order(data, l, r, order, partition);
-    if pivot > l + 1 {
-        sort_rec(data, l, pivot - 1, order, partition);
-    }
-    if pivot + 1 < r {
-        sort_rec(data, pivot + 1, r, order, partition);
-    }
+    let predicate = match order {
+        Order::Asc => |a: &T, b: &T| a < b,
+        Order::Desc => |a: &T, b: &T| a > b,
+    };
+    sort_by_predicate(data, predicate, partition);
 }
 
 pub fn sort_by_predicate<T, P>(data: &mut [T], predicate: P, partition: Partition)

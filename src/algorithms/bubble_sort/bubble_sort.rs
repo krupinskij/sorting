@@ -1,22 +1,11 @@
 use crate::Order;
 
 pub fn sort<T: PartialOrd>(data: &mut [T], order: Order) {
-    for i in 0..data.len() {
-        for j in 1..data.len() - i {
-            match order {
-                Order::Asc => {
-                    if data[j - 1] > data[j] {
-                        data.swap(j - 1, j);
-                    }
-                }
-                Order::Desc => {
-                    if data[j - 1] < data[j] {
-                        data.swap(j - 1, j);
-                    }
-                }
-            }
-        }
-    }
+    let predicate = match order {
+        Order::Asc => |a: &T, b: &T| a < b,
+        Order::Desc => |a: &T, b: &T| a > b,
+    };
+    sort_by_predicate(data, predicate);
 }
 
 pub fn sort_by_predicate<T, P>(data: &mut [T], predicate: P)
