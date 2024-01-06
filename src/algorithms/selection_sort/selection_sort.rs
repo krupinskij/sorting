@@ -102,7 +102,7 @@ mod tests {
     fn sort_by_predicate_struct_vector() {
         let car1 = Car { age: 25 };
         let car2 = Car { age: 15 };
-        let car3: Car = Car { age: 35 };
+        let car3 = Car { age: 35 };
 
         let mut vec = vec![car1, car2, car3];
         sort_by_predicate(&mut vec, |c1, c2| c1.age < c2.age);
