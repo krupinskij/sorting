@@ -3,25 +3,11 @@ use std::cmp::PartialOrd;
 use crate::Order;
 
 pub fn sort<T: PartialOrd>(data: &mut [T], order: Order) {
-    for i in 0..data.len() {
-        let mut i_min = i;
-        for j in i + 1..data.len() {
-            match order {
-                Order::Asc => {
-                    if data[j] < data[i_min] {
-                        i_min = j;
-                    }
-                }
-                Order::Desc => {
-                    if data[j] > data[i_min] {
-                        i_min = j;
-                    }
-                }
-            }
-        }
-
-        data.swap(i, i_min);
-    }
+    let predicate = match order {
+        Order::Asc => |a: &T, b: &T| a < b,
+        Order::Desc => |a: &T, b: &T| a > b,
+    };
+    sort_by_predicate(data, predicate);
 }
 
 pub fn sort_by_predicate<T, P>(data: &mut [T], predicate: P)

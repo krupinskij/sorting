@@ -1,7 +1,5 @@
 use crate::Order;
 
-use super::heap::{create_heap_by_predicate, down_heap_by_predicate};
-
 pub fn sort<T: PartialOrd>(data: &mut [T], order: Order) {
     let predicate = match order {
         Order::Asc => |a: &T, b: &T| a < b,
@@ -14,12 +12,12 @@ pub fn sort_by_predicate<T, P>(data: &mut [T], predicate: P)
 where
     P: Fn(&T, &T) -> bool,
 {
-    create_heap_by_predicate(data, &predicate);
-
-    let len = data.len();
-    for i in (1..len).rev() {
-        data.swap(0, i);
-        down_heap_by_predicate(data, 0, i, &predicate)
+    for i in 0..data.len() {
+        for j in 1..data.len() - i {
+            if predicate(&data[j], &data[j - 1]) {
+                data.swap(j - 1, j);
+            }
+        }
     }
 }
 
